@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nem sabia já quero! — achados e ofertas</title>
+  <meta name="description" content="Achados e ofertas selecionados. Nem sabia que precisava, já quero." />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="vitrine wrap">
+
+    <section class="perfil">
+      <img class="logo" src="assets/logo.png" alt="Nem sabia já quero" />
+      <p class="tagline">achados que a gente nem sabia que precisava — até ver o preço</p>
+      <p class="disclosure-top">contém links de afiliado do Mercado Livre 🏷️</p>
+    </section>
+
+    <nav id="categorias" class="categorias" aria-label="Filtrar por categoria" role="tablist"></nav>
+
+    <section id="lista" class="lista" aria-live="polite"></section>
+
+    <p id="vazio" class="vazio" hidden>Nenhum achado por aqui ainda. Tenta outra categoria.</p>
+
+    <div id="sentinela" class="sentinela" aria-hidden="true"></div>
+    <p id="fim" class="fim" hidden>é isso, por enquanto 🏷️</p>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p class="disclosure">
+        <strong>Aviso:</strong> este site participa do Programa de Afiliados do Mercado Livre.
+        Ao clicar em um link e finalizar uma compra, posso receber uma comissão —
+        isso não muda o preço que você paga.
+      </p>
+      <p class="credit">nem sabia já quero! · feito com GitHub Pages</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
