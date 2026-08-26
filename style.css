@@ -124,11 +124,11 @@ a { color: inherit; }
 .item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   background: var(--white);
   border: 2px solid var(--mustard-deep);
   border-radius: 18px;
-  padding: 10px;
+  padding: 12px;
   text-decoration: none;
   color: var(--ink);
   box-shadow: var(--shadow);
@@ -161,10 +161,10 @@ a { color: inherit; }
 }
 
 .item-media {
-  width: 64px;
-  height: 64px;
+  width: 92px;
+  height: 92px;
   flex: none;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--bg);
 }
@@ -284,4 +284,11 @@ a { color: inherit; }
   font-size: 0.72rem;
   font-family: var(--font-mono);
   color: rgba(255, 248, 238, 0.45);
+}
+
+@media (max-width: 360px) {
+  .item-media {
+    width: 76px;
+    height: 76px;
+  }
 }
