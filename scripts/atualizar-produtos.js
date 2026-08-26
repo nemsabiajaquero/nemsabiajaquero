@@ -13,8 +13,16 @@ function formatarPreco(valor) {
   return Number(valor).toFixed(2).replace(".", ",");
 }
 
+const HEADERS_NAVEGADOR = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "pt-BR,pt;q=0.9",
+};
+
 async function resolverLink(link) {
-  const resp = await fetch(link, { redirect: "follow" });
+  const resp = await fetch(link, { redirect: "follow", headers: HEADERS_NAVEGADOR });
   return resp.url;
 }
 
@@ -25,7 +33,9 @@ function extrairId(url) {
 
 async function buscarItem(id) {
   // Tenta como anúncio normal primeiro.
-  let resp = await fetch(`https://api.mercadolibre.com/items/${id}`);
+  let resp = await fetch(`https://api.mercadolibre.com/items/${id}`, {
+    headers: HEADERS_NAVEGADOR,
+  });
   if (resp.ok) {
     const data = await resp.json();
     return {
@@ -38,7 +48,9 @@ async function buscarItem(id) {
   }
 
   // Se não for um anúncio, tenta como produto de catálogo.
-  resp = await fetch(`https://api.mercadolibre.com/products/${id}`);
+  resp = await fetch(`https://api.mercadolibre.com/products/${id}`, {
+    headers: HEADERS_NAVEGADOR,
+  });
   if (resp.ok) {
     const data = await resp.json();
     const preco = data.buy_box_winner ? data.buy_box_winner.price : undefined;
@@ -57,7 +69,9 @@ async function buscarItem(id) {
 async function buscarCategoria(id) {
   if (!id) return "Geral";
   try {
-    const resp = await fetch(`https://api.mercadolibre.com/categories/${id}`);
+    const resp = await fetch(`https://api.mercadolibre.com/categories/${id}`, {
+      headers: HEADERS_NAVEGADOR,
+    });
     if (!resp.ok) return "Geral";
     const data = await resp.json();
     const nome = data.name || "Geral";
@@ -102,7 +116,9 @@ async function main() {
       const id = extrairId(urlFinal);
 
       if (!id) {
-        erros.push(`${linkOriginal} — não consegui identificar o produto nesse link.`);
+        erros.push(
+          `${linkOriginal} — não consegui identificar o produto. URL final: ${urlFinal}`
+        );
         continue;
       }
 
