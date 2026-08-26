@@ -1,0 +1,31 @@
+name: Atualizar produtos automaticamente
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - novos-links.txt
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Buscar dados dos produtos no Mercado Livre
+        run: node scripts/atualizar-produtos.js
+
+      - name: Salvar mudanças no repositório
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Atualiza produtos a partir de novos links"
+          file_pattern: "produtos.json novos-links.txt erros-links.txt"
