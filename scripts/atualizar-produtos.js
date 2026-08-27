@@ -1,5 +1,6 @@
-// Lê os links em novos-links.txt, busca os dados de cada produto na API
-// pública do Mercado Livre, e adiciona no produtos.json automaticamente.
+// Lê os links em novos-links.txt, abre a página de cada produto e extrai
+// nome, preço e imagem direto do HTML (tags de SEO), sem usar a API do
+// Mercado Livre — porque a API agora exige login pra praticamente tudo.
 // Roda sozinho via GitHub Actions — não precisa executar isso manualmente.
 
 const fs = require("fs");
@@ -7,11 +8,6 @@ const fs = require("fs");
 const LINKS_FILE = "novos-links.txt";
 const PRODUTOS_FILE = "produtos.json";
 const ERROS_FILE = "erros-links.txt";
-
-function formatarPreco(valor) {
-  if (valor === undefined || valor === null || valor === "") return "";
-  return Number(valor).toFixed(2).replace(".", ",");
-}
 
 const HEADERS_NAVEGADOR = {
   "User-Agent":
@@ -21,103 +17,121 @@ const HEADERS_NAVEGADOR = {
   "Accept-Language": "pt-BR,pt;q=0.9",
 };
 
+function formatarPreco(valor) {
+  if (valor === undefined || valor === null || valor === "") return "";
+  const numero = typeof valor === "string" ? valor.replace(",", ".") : valor;
+  const n = Number(numero);
+  if (Number.isNaN(n)) return "";
+  return n.toFixed(2).replace(".", ",");
+}
+
 async function resolverLink(link) {
   const resp = await fetch(link, { redirect: "follow", headers: HEADERS_NAVEGADOR });
   const urlFinal = resp.url;
   const corpo = await resp.text();
-  return { urlFinal, corpo };
+  return { urlFinal, corpo, status: resp.status };
 }
 
-function extrairId(texto) {
-  if (!texto) return null;
-  const match = texto.match(/MLB-?(\d{5,})/i);
-  return match ? `MLB${match[1]}` : null;
-}
+// Procura um objeto Product dentro de blocos JSON-LD (o formato estruturado
+// que sites de e-commerce usam pra aparecer bonito no Google). É a fonte
+// mais confiável quando existe.
+function extrairDoJsonLd(corpo) {
+  const blocos = [
+    ...corpo.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi),
+  ];
 
-function extrairIdDaPagina(urlFinal, corpo) {
-  // 1. tenta direto na URL final
-  let id = extrairId(urlFinal);
-  if (id) return { id, origem: urlFinal };
-
-  // 2. a URL final pode ser uma tela intermediária (ex: redirecionamento
-  //    feito por JavaScript pra abrir o app). Nesses casos o ID do produto
-  //    costuma continuar escondido no HTML, em tags de SEO.
-  const canonical = corpo.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i);
-  const ogUrl = corpo.match(/<meta[^>]+property=["']og:url["'][^>]+content=["']([^"']+)["']/i);
-
-  for (const candidato of [canonical && canonical[1], ogUrl && ogUrl[1]]) {
-    if (!candidato) continue;
-    id = extrairId(candidato);
-    if (id) return { id, origem: candidato };
-  }
-
-  // 3. último recurso: procura qualquer MLB solto em qualquer lugar do HTML.
-  id = extrairId(corpo);
-  if (id) return { id, origem: `encontrado no conteúdo de ${urlFinal}` };
-
-  return { id: null, origem: urlFinal };
-}
-
-async function buscarItem(id, diagnostico = []) {
-  // Tenta como anúncio normal primeiro (funciona pra a maioria dos links).
-  let resp = await fetch(`https://api.mercadolibre.com/items/${id}`, {
-    headers: HEADERS_NAVEGADOR,
-  });
-  if (resp.ok) {
-    const data = await resp.json();
-    return {
-      ok: true,
-      produto: {
-        nome: data.title,
-        preco: formatarPreco(data.price),
-        precoOriginal: data.original_price ? formatarPreco(data.original_price) : "",
-        imagem: (data.pictures && data.pictures[0] && data.pictures[0].url) || data.thumbnail || "",
-        categoriaId: data.category_id,
-      },
-    };
-  }
-  diagnostico.push(`GET /items/${id} -> HTTP ${resp.status}`);
-
-  // Se não for um anúncio (é um "produto de catálogo", padrão /p/MLB... nas
-  // URLs), a API de produto exige login. Em vez disso, usamos a busca
-  // pública filtrando por catalog_product_id, que devolve os anúncios reais
-  // vinculados a esse produto — e aí buscamos o primeiro normalmente.
-  resp = await fetch(
-    `https://api.mercadolibre.com/sites/MLB/search?catalog_product_id=${id}`,
-    { headers: HEADERS_NAVEGADOR }
-  );
-  if (resp.ok) {
-    const data = await resp.json();
-    const primeiro = data.results && data.results[0];
-    if (primeiro && primeiro.id && primeiro.id !== id) {
-      return buscarItem(primeiro.id, diagnostico);
+  for (const bloco of blocos) {
+    let dados;
+    try {
+      dados = JSON.parse(bloco[1]);
+    } catch {
+      continue;
     }
-    const total = data.paging ? data.paging.total : "?";
-    diagnostico.push(
-      `GET /sites/MLB/search?catalog_product_id=${id} -> HTTP 200, mas 0 resultados (total: ${total})`
-    );
-  } else {
-    diagnostico.push(
-      `GET /sites/MLB/search?catalog_product_id=${id} -> HTTP ${resp.status}`
-    );
-  }
 
-  return { ok: false, diagnostico };
+    const candidatos = Array.isArray(dados)
+      ? dados
+      : Array.isArray(dados["@graph"])
+      ? dados["@graph"]
+      : [dados];
+
+    for (const c of candidatos) {
+      if (!c) continue;
+      const tipo = c["@type"];
+      const ehProduto = tipo === "Product" || (Array.isArray(tipo) && tipo.includes("Product"));
+      if (!ehProduto || !c.name) continue;
+
+      const oferta = Array.isArray(c.offers) ? c.offers[0] : c.offers;
+      const imagem = Array.isArray(c.image) ? c.image[0] : c.image;
+
+      return {
+        nome: c.name,
+        preco: oferta && oferta.price ? formatarPreco(oferta.price) : "",
+        imagem: imagem || "",
+        origem: "json-ld",
+      };
+    }
+  }
+  return null;
 }
 
-async function buscarCategoria(id) {
-  if (!id) return "Geral";
-  try {
-    const resp = await fetch(`https://api.mercadolibre.com/categories/${id}`, {
-      headers: HEADERS_NAVEGADOR,
-    });
-    if (!resp.ok) return "Geral";
-    const data = await resp.json();
-    const nome = data.name || "Geral";
-    return nome.split(",")[0].trim();
-  } catch {
-    return "Geral";
+// Se não achar JSON-LD, tenta as tags de Open Graph (og:title, og:image) e
+// a extensão de produto (product:price:amount), usadas pra pré-visualização
+// em redes sociais.
+function extrairDeMetaTags(corpo) {
+  const pegar = (propriedade) => {
+    const re = new RegExp(
+      `<meta[^>]+(?:property|name)=["']${propriedade}["'][^>]+content=["']([^"']+)["']`,
+      "i"
+    );
+    const m = corpo.match(re);
+    return m ? m[1] : null;
+  };
+
+  const nome = pegar("og:title");
+  if (!nome) return null;
+
+  const imagem = pegar("og:image");
+  const preco = pegar("product:price:amount") || pegar("og:price:amount");
+
+  return {
+    nome,
+    preco: preco ? formatarPreco(preco) : "",
+    imagem: imagem || "",
+    origem: "meta-tags",
+  };
+}
+
+function extrairDadosDoProduto(corpo) {
+  return extrairDoJsonLd(corpo) || extrairDeMetaTags(corpo);
+}
+
+// Tenta achar a categoria a partir do "breadcrumb" (caminho tipo Casa >
+// Cozinha > Panelas) que também costuma vir em JSON-LD.
+function extrairCategoria(corpo) {
+  const blocos = [
+    ...corpo.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi),
+  ];
+
+  for (const bloco of blocos) {
+    let dados;
+    try {
+      dados = JSON.parse(bloco[1]);
+    } catch {
+      continue;
+    }
+    const candidatos = Array.isArray(dados) ? dados : [dados];
+    for (const c of candidatos) {
+      if (c && c["@type"] === "BreadcrumbList" && Array.isArray(c.itemListElement)) {
+        const nomes = c.itemListElement
+          .map((item) => item.name)
+          .filter(Boolean);
+        // pega o penúltimo (o último costuma ser o nome do próprio produto)
+        if (nomes.length >= 2) return nomes[nomes.length - 2];
+        if (nomes.length === 1) return nomes[0];
+      }
+    }
   }
+  return "Geral";
 }
 
 async function main() {
@@ -151,45 +165,42 @@ async function main() {
         continue;
       }
 
-      const { urlFinal, corpo } = await resolverLink(linkOriginal);
-      const { id, origem } = extrairIdDaPagina(urlFinal, corpo);
+      const { urlFinal, corpo, status } = await resolverLink(linkOriginal);
 
-      if (!id) {
-        erros.push(
-          `${linkOriginal} — não consegui identificar o produto. URL final: ${urlFinal}`
-        );
+      if (status >= 400) {
+        erros.push(`${linkOriginal} — a página respondeu HTTP ${status}. URL final: ${urlFinal}`);
         continue;
       }
 
-      const resultado = await buscarItem(id);
-      if (!resultado.ok || !resultado.produto || !resultado.produto.nome) {
-        const detalhes = resultado.diagnostico ? resultado.diagnostico.join(" | ") : "";
+      const dados = extrairDadosDoProduto(corpo);
+
+      if (!dados || !dados.nome) {
         erros.push(
-          `${linkOriginal} — produto não encontrado na API do Mercado Livre. ID: ${id}. Detalhes: ${detalhes}`
+          `${linkOriginal} — não encontrei os dados do produto no HTML da página. URL final: ${urlFinal}`
         );
         continue;
       }
-      const item = resultado.produto;
-
-      const categoria = await buscarCategoria(item.categoriaId);
 
       produtos.push({
-        nome: item.nome,
-        categoria,
-        preco: item.preco,
-        precoOriginal: item.precoOriginal,
-        imagem: item.imagem,
+        nome: dados.nome,
+        categoria: extrairCategoria(corpo),
+        preco: dados.preco,
+        precoOriginal: "",
+        imagem: dados.imagem,
         link: linkOriginal,
       });
 
-      console.log(`Adicionado: ${item.nome}`);
+      console.log(`Adicionado (via ${dados.origem}): ${dados.nome}`);
     } catch (err) {
       erros.push(`${linkOriginal} — erro ao processar: ${err.message}`);
     }
   }
 
   fs.writeFileSync(PRODUTOS_FILE, JSON.stringify(produtos, null, 2) + "\n");
-  fs.writeFileSync(LINKS_FILE, "# Cole aqui um link de afiliado do Mercado Livre por linha e salve (commit).\n# O site atualiza sozinho em 1-2 minutos.\n");
+  fs.writeFileSync(
+    LINKS_FILE,
+    "# Cole aqui um link de afiliado do Mercado Livre por linha e salve (commit).\n# O site atualiza sozinho em 1-2 minutos.\n"
+  );
 
   if (erros.length > 0) {
     fs.writeFileSync(ERROS_FILE, erros.join("\n") + "\n");
