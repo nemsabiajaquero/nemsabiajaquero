@@ -205,8 +205,8 @@ async function main() {
   if (erros.length > 0) {
     fs.writeFileSync(ERROS_FILE, erros.join("\n") + "\n");
     console.log(`${erros.length} link(s) com problema — ver ${ERROS_FILE}`);
-  } else if (fs.existsSync(ERROS_FILE)) {
-    fs.unlinkSync(ERROS_FILE);
+  } else {
+    fs.writeFileSync(ERROS_FILE, "Sem erros no último processamento. 🎉\n");
   }
 }
 
