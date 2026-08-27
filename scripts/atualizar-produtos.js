@@ -58,7 +58,7 @@ function extrairIdDaPagina(urlFinal, corpo) {
   return { id: null, origem: urlFinal };
 }
 
-async function buscarItem(id) {
+async function buscarItem(id, diagnostico = []) {
   // Tenta como anúncio normal primeiro (funciona pra a maioria dos links).
   let resp = await fetch(`https://api.mercadolibre.com/items/${id}`, {
     headers: HEADERS_NAVEGADOR,
@@ -66,13 +66,17 @@ async function buscarItem(id) {
   if (resp.ok) {
     const data = await resp.json();
     return {
-      nome: data.title,
-      preco: formatarPreco(data.price),
-      precoOriginal: data.original_price ? formatarPreco(data.original_price) : "",
-      imagem: (data.pictures && data.pictures[0] && data.pictures[0].url) || data.thumbnail || "",
-      categoriaId: data.category_id,
+      ok: true,
+      produto: {
+        nome: data.title,
+        preco: formatarPreco(data.price),
+        precoOriginal: data.original_price ? formatarPreco(data.original_price) : "",
+        imagem: (data.pictures && data.pictures[0] && data.pictures[0].url) || data.thumbnail || "",
+        categoriaId: data.category_id,
+      },
     };
   }
+  diagnostico.push(`GET /items/${id} -> HTTP ${resp.status}`);
 
   // Se não for um anúncio (é um "produto de catálogo", padrão /p/MLB... nas
   // URLs), a API de produto exige login. Em vez disso, usamos a busca
@@ -86,11 +90,19 @@ async function buscarItem(id) {
     const data = await resp.json();
     const primeiro = data.results && data.results[0];
     if (primeiro && primeiro.id && primeiro.id !== id) {
-      return buscarItem(primeiro.id);
+      return buscarItem(primeiro.id, diagnostico);
     }
+    const total = data.paging ? data.paging.total : "?";
+    diagnostico.push(
+      `GET /sites/MLB/search?catalog_product_id=${id} -> HTTP 200, mas 0 resultados (total: ${total})`
+    );
+  } else {
+    diagnostico.push(
+      `GET /sites/MLB/search?catalog_product_id=${id} -> HTTP ${resp.status}`
+    );
   }
 
-  return null;
+  return { ok: false, diagnostico };
 }
 
 async function buscarCategoria(id) {
@@ -149,11 +161,15 @@ async function main() {
         continue;
       }
 
-      const item = await buscarItem(id);
-      if (!item || !item.nome) {
-        erros.push(`${linkOriginal} — produto não encontrado na API do Mercado Livre.`);
+      const resultado = await buscarItem(id);
+      if (!resultado.ok || !resultado.produto || !resultado.produto.nome) {
+        const detalhes = resultado.diagnostico ? resultado.diagnostico.join(" | ") : "";
+        erros.push(
+          `${linkOriginal} — produto não encontrado na API do Mercado Livre. ID: ${id}. Detalhes: ${detalhes}`
+        );
         continue;
       }
+      const item = resultado.produto;
 
       const categoria = await buscarCategoria(item.categoriaId);
 
