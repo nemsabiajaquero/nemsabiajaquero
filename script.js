@@ -123,8 +123,8 @@ function criarItem(p, i) {
         <span class="preco-atual">${formatarPreco(p.preco)}</span>
         ${temDesconto ? `<span class="preco-original">${formatarPreco(p.precoOriginal)}</span>` : ""}
       </div>
+      <span class="item-cta">Ver oferta →</span>
     </div>
-    <div class="item-seta" aria-hidden="true">→</div>
   `;
   return item;
 }
