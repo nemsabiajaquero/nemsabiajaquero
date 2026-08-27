@@ -1,1 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel — adicionar produto</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff8ee;
+    --maroon: #7a1220;
+    --maroon-deep: #5c0d17;
+    --mustard: #f3b94e;
+    --mustard-deep: #e3963e;
+    --orange: #c1521a;
+    --ink: #3b241a;
+    --ink-soft: #8a7565;
+    --white: #ffffff;
+    --line: rgba(59, 36, 26, 0.15);
+    --ok: #2f7a3d;
+    --erro: #b33a2e;
+    --font-display: "Baloo 2", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 {
+    font-family: var(--font-display);
+    color: var(--maroon);
+    font-size: 1.5rem;
+    margin: 0 0 4px;
+  }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    margin: 0 0 24px;
+  }
+  .voltar {
+    display: inline-block;
+    color: var(--maroon);
+    font-size: 0.8rem;
+    text-decoration: none;
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+  }
+  .card {
+    background: var(--white);
+    border: 2px solid var(--mustard-deep);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    margin: 0 0 10px;
+    color: var(--maroon);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .numero {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--mustard);
+    color: var(--maroon-deep);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 10px 0 4px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  .linha-botoes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-principal { background: var(--maroon); color: var(--white); }
+  .btn-secundario { background: var(--mustard); color: var(--maroon-deep); }
+  .btn-link {
+    background: transparent;
+    color: var(--maroon);
+    text-decoration: underline;
+    padding: 9px 4px;
+  }
+  .status {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    display: none;
+  }
+  .status.mostrar { display: block; }
+  .status.ok { background: rgba(47, 122, 61, 0.1); color: var(--ok); }
+  .status.erro { background: rgba(179, 58, 46, 0.1); color: var(--erro); }
+  .status.info { background: rgba(59, 36, 26, 0.06); color: var(--ink-soft); }
 
+  .fallback {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .fallback.mostrar { display: block; }
+
+  .preview {
+    display: none;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 14px;
+  }
+  .preview.mostrar { display: flex; }
+  .preview img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: var(--bg);
+    flex: none;
+  }
+  .preview-campos { flex: 1; min-width: 0; }
+
+  .lista-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+  }
+  .lista-item img {
+    width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex: none;
+  }
+  .lista-item .info { flex: 1; min-width: 0; font-size: 0.82rem; }
+  .lista-item .info strong { display: block; font-size: 0.85rem; }
+  .lista-item button {
+    background: transparent;
+    color: var(--erro);
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
+  .vazio-lista {
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+  }
+  .copiavel {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="voltar" href="index.html">← voltar pra vitrine</a>
+  <h1>Painel — adicionar produto</h1>
+  <p class="sub">
+    Roda no seu navegador (seu IP normal), não no servidor do GitHub — por
+    isso consegue buscar os dados sem travar. Cada produto vira um bloco de
+    texto pra você colar no <code>produtos.json</code>.
+  </p>
+
+  <div class="card">
+    <h2><span class="numero">1</span> Link de afiliado</h2>
+    <label for="linkAfiliado">Cole aqui o link que você quer usar no site (com os parâmetros de comissão). É esse que fica salvo.</label>
+    <input type="text" id="linkAfiliado" placeholder="https://meli.la/... ou https://www.mercadolivre.com.br/social/...?matt_word=..." />
+  </div>
+
+  <div class="card">
+    <h2><span class="numero">2</span> Encontrar o produto</h2>
+    <label for="linkProduto">
+      Cole aqui a URL da página do produto. Se o link acima for curto ou de
+      redirecionamento, abra ele numa aba nova primeiro, espere carregar a
+      página do produto, e cole a URL que ficou na barra de endereço.
+    </label>
+    <input type="text" id="linkProduto" placeholder="https://www.mercadolivre.com.br/.../p/MLB123456 ou .../MLB-123456789-..." />
+    <div class="linha-botoes">
+      <button class="btn-secundario" type="button" onclick="abrirLinkAfiliado()">Abrir o link do passo 1 numa aba nova</button>
+      <button class="btn-principal" type="button" onclick="detectarId()">Detectar ID do produto</button>
+    </div>
+    <label for="idProduto">ID detectado (edite se precisar)</label>
+    <input type="text" id="idProduto" placeholder="MLB123456789" />
+  </div>
+
+  <div class="card">
+    <h2><span class="numero">3</span> Buscar dados</h2>
+    <div class="linha-botoes">
+      <button class="btn-principal" type="button" onclick="buscarAutomatico()">Buscar dados automaticamente</button>
+    </div>
+    <div id="statusBusca" class="status"></div>
+
+    <div id="preview" class="preview">
+      <img id="previewImg" src="" alt="" />
+      <div class="preview-campos">
+        <label for="campoNome">Nome</label>
+        <input type="text" id="campoNome" />
+        <label for="campoCategoria">Categoria</label>
+        <input type="text" id="campoCategoria" />
+        <label for="campoPreco">Preço (ex: 89,90)</label>
+        <input type="text" id="campoPreco" />
+        <label for="campoPrecoOriginal">Preço original (deixe vazio se não tiver desconto)</label>
+        <input type="text" id="campoPrecoOriginal" />
+        <label for="campoImagem">URL da imagem</label>
+        <input type="text" id="campoImagem" />
+        <div class="linha-botoes">
+          <button class="btn-principal" type="button" onclick="adicionarNaLista()">Adicionar à lista</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="fallback" class="fallback">
+      <p class="status info mostrar">
+        A busca automática não trouxe o resultado. Faz assim: abre um dos
+        links abaixo numa aba nova (ele mostra um texto em formato JSON),
+        seleciona tudo (Ctrl+A / Cmd+A), copia, e cola na caixa abaixo.
+      </p>
+      <div class="linha-botoes">
+        <a id="linkApiItem" class="btn-link" href="#" target="_blank" rel="noopener">Abrir como anúncio (items)</a>
+        <a id="linkApiBusca" class="btn-link" href="#" target="_blank" rel="noopener">Abrir como produto de catálogo (search)</a>
+      </div>
+      <label for="jsonColado">Cole aqui o conteúdo que apareceu na aba</label>
+      <textarea id="jsonColado" placeholder='{"title": "...", "price": ...}'></textarea>
+      <div class="linha-botoes">
+        <button class="btn-principal" type="button" onclick="processarJsonColado()">Processar JSON colado</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="numero">4</span> Produtos prontos nesta sessão</h2>
+    <div id="listaProdutos"><p class="vazio-lista">Nenhum produto adicionado ainda.</p></div>
+    <div class="linha-botoes">
+      <button class="btn-secundario" type="button" onclick="copiarTodos()">Copiar todos como JSON</button>
+    </div>
+    <p class="sub" style="margin-top:10px;">
+      Cole o resultado dentro do <code>produtos.json</code>, logo antes do
+      <code>]</code> final (separando do item anterior com uma vírgula).
+    </p>
+    <textarea id="saidaJson" class="copiavel" readonly style="margin-top:8px; display:none;"></textarea>
+  </div>
+
+</div>
+
+<script>
+  const HEADERS = { "Accept": "application/json" };
+  let listaSessao = [];
+
+  function mostrarStatus(el, tipo, texto) {
+    el.className = "status mostrar " + tipo;
+    el.textContent = texto;
+  }
+
+  function limparStatus(el) {
+    el.className = "status";
+    el.textContent = "";
+  }
+
+  function abrirLinkAfiliado() {
+    const link = document.getElementById("linkAfiliado").value.trim();
+    if (!link) {
+      alert("Cole o link de afiliado no passo 1 primeiro.");
+      return;
+    }
+    window.open(link, "_blank", "noopener");
+  }
+
+  function extrairIdDeTexto(texto) {
+    if (!texto) return null;
+    const m = texto.match(/MLB-?(\d{5,})/i);
+    return m ? "MLB" + m[1] : null;
+  }
+
+  function detectarId() {
+    const url = document.getElementById("linkProduto").value.trim();
+    const id = extrairIdDeTexto(url);
+    const campoId = document.getElementById("idProduto");
+    if (id) {
+      campoId.value = id;
+    } else {
+      alert("Não encontrei um ID (MLB seguido de números) nessa URL. Confira se colou a URL certa, ou digite o ID manualmente.");
+    }
+  }
+
+  function formatarPreco(valor) {
+    if (valor === undefined || valor === null || valor === "") return "";
+    return Number(valor).toFixed(2).replace(".", ",");
+  }
+
+  async function buscarCategoriaNome(categoriaId) {
+    if (!categoriaId) return "Geral";
+    try {
+      const resp = await fetch(`https://api.mercadolibre.com/categories/${categoriaId}`, { headers: HEADERS });
+      if (!resp.ok) return "Geral";
+      const data = await resp.json();
+      return (data.name || "Geral").split(",")[0].trim();
+    } catch {
+      return "Geral";
+    }
+  }
+
+  function preencherPreview(dados) {
+    document.getElementById("campoNome").value = dados.nome || "";
+    document.getElementById("campoCategoria").value = dados.categoria || "Geral";
+    document.getElementById("campoPreco").value = dados.preco || "";
+    document.getElementById("campoPrecoOriginal").value = dados.precoOriginal || "";
+    document.getElementById("campoImagem").value = dados.imagem || "";
+    document.getElementById("previewImg").src = dados.imagem || "";
+    document.getElementById("preview").classList.add("mostrar");
+  }
+
+  async function tentarBuscarItem(id) {
+    let resp = await fetch(`https://api.mercadolibre.com/items/${id}`, { headers: HEADERS });
+    if (resp.ok) {
+      const data = await resp.json();
+      return montarDadosDeItem(data);
+    }
+
+    resp = await fetch(`https://api.mercadolibre.com/sites/MLB/search?catalog_product_id=${id}`, { headers: HEADERS });
+    if (resp.ok) {
+      const data = await resp.json();
+      const primeiro = data.results && data.results[0];
+      if (primeiro && primeiro.id) {
+        return tentarBuscarItem(primeiro.id);
+      }
+    }
+    return null;
+  }
+
+  async function montarDadosDeItem(data) {
+    const categoria = await buscarCategoriaNome(data.category_id);
+    return {
+      nome: data.title,
+      categoria,
+      preco: formatarPreco(data.price),
+      precoOriginal: data.original_price ? formatarPreco(data.original_price) : "",
+      imagem: (data.pictures && data.pictures[0] && data.pictures[0].url) || data.thumbnail || "",
+    };
+  }
+
+  async function buscarAutomatico() {
+    const statusEl = document.getElementById("statusBusca");
+    const id = document.getElementById("idProduto").value.trim();
+    document.getElementById("fallback").classList.remove("mostrar");
+    document.getElementById("preview").classList.remove("mostrar");
+
+    if (!id) {
+      mostrarStatus(statusEl, "erro", "Detecte ou digite o ID do produto no passo 2 primeiro.");
+      return;
+    }
+
+    mostrarStatus(statusEl, "info", "Buscando...");
+
+    try {
+      const dados = await tentarBuscarItem(id);
+      if (dados && dados.nome) {
+        limparStatus(statusEl);
+        preencherPreview(dados);
+      } else {
+        mostrarStatus(statusEl, "erro", "Não achei esse produto pela busca automática. Use o jeito manual abaixo.");
+        prepararFallback(id);
+      }
+    } catch (err) {
+      mostrarStatus(statusEl, "erro", "A busca automática falhou (" + err.message + "). Use o jeito manual abaixo.");
+      prepararFallback(id);
+    }
+  }
+
+  function prepararFallback(id) {
+    document.getElementById("linkApiItem").href = `https://api.mercadolibre.com/items/${id}`;
+    document.getElementById("linkApiBusca").href = `https://api.mercadolibre.com/sites/MLB/search?catalog_product_id=${id}`;
+    document.getElementById("fallback").classList.add("mostrar");
+  }
+
+  async function processarJsonColado() {
+    const texto = document.getElementById("jsonColado").value.trim();
+    if (!texto) {
+      alert("Cole o conteúdo copiado da aba antes de processar.");
+      return;
+    }
+    let data;
+    try {
+      data = JSON.parse(texto);
+    } catch {
+      alert("Isso não parece um JSON válido. Confira se copiou o texto inteiro da aba.");
+      return;
+    }
+
+    // Pode ser um "item" direto, ou um resultado de busca com results[0].
+    let itemBruto = data;
+    if (data.results && data.results[0]) {
+      itemBruto = data.results[0];
+    }
+
+    if (!itemBruto || !itemBruto.title) {
+      alert("Não encontrei um campo \"title\" nesse JSON. Confira se colou o conteúdo certo.");
+      return;
+    }
+
+    const dados = await montarDadosDeItem(itemBruto);
+    preencherPreview(dados);
+  }
+
+  function adicionarNaLista() {
+    const link = document.getElementById("linkAfiliado").value.trim();
+    if (!link) {
+      alert("Preencha o link de afiliado no passo 1 antes de adicionar.");
+      return;
+    }
+    const produto = {
+      nome: document.getElementById("campoNome").value.trim(),
+      categoria: document.getElementById("campoCategoria").value.trim() || "Geral",
+      preco: document.getElementById("campoPreco").value.trim(),
+      precoOriginal: document.getElementById("campoPrecoOriginal").value.trim(),
+      imagem: document.getElementById("campoImagem").value.trim(),
+      link,
+    };
+    if (!produto.nome) {
+      alert("Preencha ao menos o nome do produto.");
+      return;
+    }
+    listaSessao.push(produto);
+    renderizarLista();
+
+    // limpa os campos pra adicionar o próximo produto
+    document.getElementById("linkAfiliado").value = "";
+    document.getElementById("linkProduto").value = "";
+    document.getElementById("idProduto").value = "";
+    document.getElementById("preview").classList.remove("mostrar");
+    limparStatus(document.getElementById("statusBusca"));
+    document.getElementById("fallback").classList.remove("mostrar");
+    document.getElementById("jsonColado").value = "";
+  }
+
+  function removerDaLista(indice) {
+    listaSessao.splice(indice, 1);
+    renderizarLista();
+  }
+
+  function renderizarLista() {
+    const container = document.getElementById("listaProdutos");
+    if (listaSessao.length === 0) {
+      container.innerHTML = '<p class="vazio-lista">Nenhum produto adicionado ainda.</p>';
+      return;
+    }
+    container.innerHTML = "";
+    listaSessao.forEach((p, i) => {
+      const div = document.createElement("div");
+      div.className = "lista-item";
+      div.innerHTML = `
+        <img src="${p.imagem}" alt="" />
+        <div class="info"><strong>${escaparHtml(p.nome)}</strong>${escaparHtml(p.categoria)} · R$ ${escaparHtml(p.preco)}</div>
+        <button type="button" onclick="removerDaLista(${i})">remover</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function escaparHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str || "";
+    return div.innerHTML;
+  }
+
+  function copiarTodos() {
+    if (listaSessao.length === 0) {
+      alert("Adicione ao menos um produto à lista primeiro.");
+      return;
+    }
+    const texto = listaSessao.map((p) => JSON.stringify(p, null, 2)).join(",\n");
+    const saida = document.getElementById("saidaJson");
+    saida.style.display = "block";
+    saida.value = texto;
+    saida.select();
+    try {
+      navigator.clipboard.writeText(texto);
+      alert("Copiado! Cole no produtos.json, antes do ] final.");
+    } catch {
+      alert("Não consegui copiar automaticamente — o texto está selecionado na caixa abaixo, copie manualmente (Ctrl+C).");
+    }
+  }
+</script>
+</body>
+</html>
