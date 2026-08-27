@@ -1,1 +1,1 @@
-https://meli.la/2ddyLci — produto não encontrado na API do Mercado Livre.
+https://meli.la/2ddyLci — produto não encontrado na API do Mercado Livre. ID: MLB5872060016. Detalhes: GET /items/MLB5872060016 -> HTTP 403 | GET /sites/MLB/search?catalog_product_id=MLB5872060016 -> HTTP 403
