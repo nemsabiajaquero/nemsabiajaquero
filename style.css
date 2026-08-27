@@ -30,7 +30,7 @@ body {
 }
 
 .wrap {
-  max-width: 560px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -43,7 +43,8 @@ a { color: inherit; }
 
 .perfil {
   text-align: center;
-  margin-bottom: 24px;
+  margin: 0 auto 24px;
+  max-width: 480px;
 }
 
 .logo {
@@ -112,23 +113,22 @@ a { color: inherit; }
   outline-offset: 2px;
 }
 
-/* ---------- Lista (Linktree-style stacked items) ---------- */
+/* ---------- Lista (grade responsiva de produtos) ---------- */
 
 .lista {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
   padding-bottom: 56px;
 }
 
 .item {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
   background: var(--white);
   border: 2px solid var(--mustard-deep);
   border-radius: 18px;
-  padding: 12px;
+  overflow: hidden;
   text-decoration: none;
   color: var(--ink);
   box-shadow: var(--shadow);
@@ -161,11 +161,8 @@ a { color: inherit; }
 }
 
 .item-media {
-  width: 118px;
-  height: 118px;
-  flex: none;
-  border-radius: 14px;
-  overflow: hidden;
+  width: 100%;
+  height: 250px;
   background: var(--bg);
 }
 
@@ -177,16 +174,15 @@ a { color: inherit; }
 }
 
 .item-info {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  padding: 14px 16px 16px;
 }
 
 .item-categoria {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-soft);
@@ -195,9 +191,9 @@ a { color: inherit; }
 .item-nome {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.28;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -208,34 +204,35 @@ a { color: inherit; }
   font-family: var(--font-mono);
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 2px;
 }
 
 .preco-atual {
   font-weight: 700;
   color: var(--orange);
-  font-size: 0.98rem;
+  font-size: 1.6rem;
 }
 
 .preco-original {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   color: var(--ink-soft);
   text-decoration: line-through;
 }
 
-.item-seta {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--mustard);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--maroon-deep);
-  font-weight: 700;
-  font-size: 1rem;
+.item-cta {
+  margin-top: 10px;
+  text-align: center;
+  background: var(--maroon);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 11px 14px;
+  border-radius: 999px;
 }
+
+.item:hover .item-cta { background: var(--maroon-deep); }
 
 .vazio {
   text-align: center;
