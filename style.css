@@ -48,8 +48,8 @@ a { color: inherit; }
 }
 
 .logo {
-  width: 148px;
-  height: 148px;
+  width: 250px;
+  height: 250px;
   object-fit: contain;
   margin: 0 auto 4px;
   display: block;
