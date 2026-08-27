@@ -204,20 +204,23 @@ a { color: inherit; }
   font-family: var(--font-mono);
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 6px;
   margin-top: 2px;
 }
 
 .preco-atual {
   font-weight: 700;
   color: var(--orange);
-  font-size: 1.6rem;
+  font-size: 1.3rem;
+  white-space: nowrap;
 }
 
 .preco-original {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--ink-soft);
   text-decoration: line-through;
+  white-space: nowrap;
 }
 
 .item-cta {
