@@ -9,7 +9,7 @@
   },
   {
     "nome": "Mini Mixer",
-    "categoria": "Cozinha",
+    "categoria": "Casa e Cozinha",
     "preco": "19,19",
     "precoOriginal": "49,99",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_906444-MLA113292060459_062026-F.webp",
@@ -17,7 +17,7 @@
   },
   {
     "nome": "Copo Stanley 473ml",
-    "categoria": "Casa",
+    "categoria": "Casa e Cozinha",
     "preco": "146,55",
     "precoOriginal": "179",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_711456-MLA95939541195_102025-F.webp",
@@ -25,7 +25,7 @@
   },
   {
     "nome": "Kit 5 elásticos para treinar",
-    "categoria": "Fitness",
+    "categoria": "Esporte",
     "preco": "19,50",
     "precoOriginal": "32,90",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_955663-MLB78528111520_082024-F-kit-5-faixa-elastica-p-treino-extersor-super-band-academia.webp",
@@ -33,7 +33,7 @@
   },
   {
     "nome": "Kit 2 Travesseiros Antialérgico Lavável Fibra Siliconada Toque de Pluma de Ganso",
-    "categoria": "Casa",
+    "categoria": "Casa e Cozinha",
     "preco": "34,99",
     "precoOriginal": "63,20",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_774639-MLA100083759943_122025-F.webp",
@@ -41,7 +41,7 @@
   },
   {
     "nome": "Lixeira 12L INOX",
-    "categoria": "Casa",
+    "categoria": "Casa e Cozinha",
     "preco": "92,90",
     "precoOriginal": "115,90",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_945910-MLA112905990580_072026-F.webp",
@@ -49,7 +49,7 @@
   },
   {
     "nome": "Kit 10 Potes Vidro p/ Forno Micro-ondas ou Freezer",
-    "categoria": "Cozinha",
+    "categoria": "Casa e Cozinha",
     "preco": "103,41",
     "precoOriginal": "189,99",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_967837-MLA114246925459_072026-F.webp",
@@ -65,7 +65,7 @@
   },
   {
     "nome": "Kit 3 Bandejas De Bambu Retangular",
-    "categoria": "Casa",
+    "categoria": "Casa e Cozinha",
     "preco": "25,18",
     "precoOriginal": "51,50",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_967837-MLA114246925459_072026-F.webp",
@@ -89,7 +89,7 @@
   },
   {
     "nome": "Creatina Monohidratada 250g Growth",
-    "categoria": "Casa",
+    "categoria": "Esporte",
     "preco": "39,90",
     "precoOriginal": "64,90",
     "imagem": "https://http2.mlstatic.com/D_NQ_NP_2X_662415-MLA97812910758_112025-F.webp",
