@@ -1,1 +1,5 @@
-Sem erros no último processamento. 🎉
+https://meli.la/2CyYZb8 — produto adicionado, preço encontrado, mas sem preço original (pode ser que não tenha desconto mesmo). Pistas de desconto encontradas:
+  rice","id":"price","column":1,"price":{"previous_price":{"value":42.5,"currency":"BRL","decimal_style":"normal"},"
+  ":"BRL","decimal_style":"superscript"},"discount_label":{"text":"6% OFF","styles":{"color_hex":"#FFFFFF","ba
+  ,{"type":"price","id":"price","price":{"previous_price":{"value":39.81,"currency":"BRL","decimal_style":"normal"},
+  ":"BRL","decimal_style":"superscript"},"discount_label":{"text":"7% OFF","styles":{"color_hex":"#FFFFFF","ba
