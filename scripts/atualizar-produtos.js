@@ -105,6 +105,21 @@ function extrairDadosDoProduto(corpo) {
   return extrairDoJsonLd(corpo) || extrairDeMetaTags(corpo);
 }
 
+// Quando não acha o preço, junta pedacinhos da página perto de qualquer
+// ocorrência de "price" pra gente conseguir ver o formato real usado —
+// em vez de ficar chutando às cegas.
+function coletarPistasDePreco(corpo) {
+  const pistas = [];
+  const re = /.{40}price.{60}/gi;
+  let m;
+  let contagem = 0;
+  while ((m = re.exec(corpo)) !== null && contagem < 4) {
+    pistas.push(m[0].replace(/\s+/g, " ").trim());
+    contagem++;
+  }
+  return pistas;
+}
+
 // Tenta achar a categoria a partir do "breadcrumb" (caminho tipo Casa >
 // Cozinha > Panelas) que também costuma vir em JSON-LD.
 function extrairCategoria(corpo) {
@@ -189,6 +204,14 @@ async function main() {
         imagem: dados.imagem,
         link: linkOriginal,
       });
+
+      if (!dados.preco) {
+        const pistas = coletarPistasDePreco(corpo);
+        erros.push(
+          `${linkOriginal} — produto adicionado, mas sem preço. Pistas encontradas na página:\n  ` +
+            (pistas.length > 0 ? pistas.join("\n  ") : "(nenhuma ocorrência de 'price' encontrada na página)")
+        );
+      }
 
       console.log(`Adicionado (via ${dados.origem}): ${dados.nome}`);
     } catch (err) {
