@@ -113,7 +113,9 @@ function extrairPrecoDeComponentes(corpo) {
   const mAtual = corpo.match(/"current_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/);
   if (!mAtual) return null;
 
-  const mOriginal = corpo.match(/"original_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/);
+  const mOriginal =
+    corpo.match(/"original_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/) ||
+    corpo.match(/"previous_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/);
 
   return {
     preco: formatarPreco(mAtual[1]),
