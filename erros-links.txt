@@ -1,1 +1,5 @@
-Sem erros no último processamento. 🎉
+https://meli.la/1biQgsj — produto adicionado, mas sem preço. Pistas encontradas na página:
+  ml Wd-40","long_title":false}},{"type":"price","id":"price","column":1,"price":{"current_price":{"value":
+  ay 300ml","long_title":false}},{"type":"price","id":"price","price":{"current_price":{"value":47.8,"curre
+  so 300ml","long_title":false}},{"type":"price","id":"price","price":{"current_price":{"value":39.99,"curr
+  ,"icon_id":"icon_cockade"}}]}},{"type":"price","id":"price","price":{"current_price":{"value":99.9,"curre
