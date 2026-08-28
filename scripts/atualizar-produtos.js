@@ -181,7 +181,7 @@ async function main() {
         continue;
       }
 
-      produtos.push({
+      produtos.unshift({
         nome: dados.nome,
         categoria: extrairCategoria(corpo),
         preco: dados.preco,
