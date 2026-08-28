@@ -121,15 +121,14 @@ function extrairPrecoDeComponentes(corpo) {
   };
 }
 
-// Quando não acha o preço, junta pedacinhos da página perto de qualquer
-// ocorrência de "price" pra gente conseguir ver o formato real usado —
-// em vez de ficar chutando às cegas.
-function coletarPistasDePreco(corpo) {
+// Junta pedacinhos da página perto de qualquer ocorrência de um termo,
+// pra gente conseguir ver o formato real usado — em vez de ficar chutando.
+function coletarPistas(corpo, termo, limite = 4) {
   const pistas = [];
-  const re = /.{40}price.{60}/gi;
+  const re = new RegExp(`.{40}(?:${termo}).{60}`, "gi");
   let m;
   let contagem = 0;
-  while ((m = re.exec(corpo)) !== null && contagem < 4) {
+  while ((m = re.exec(corpo)) !== null && contagem < limite) {
     pistas.push(m[0].replace(/\s+/g, " ").trim());
     contagem++;
   }
@@ -213,12 +212,24 @@ async function main() {
       }
 
       let precoOriginal = "";
+      let pistasDesconto = [];
       if (!dados.preco) {
         const precos = extrairPrecoDeComponentes(corpo);
         if (precos) {
           dados.preco = precos.preco;
           precoOriginal = precos.precoOriginal;
         }
+      } else {
+        // Preço já veio do JSON-LD/meta tags. Ainda assim tenta achar o
+        // preço original (desconto) no formato próprio do Mercado Livre.
+        const precos = extrairPrecoDeComponentes(corpo);
+        if (precos && precos.precoOriginal) {
+          precoOriginal = precos.precoOriginal;
+        }
+      }
+
+      if (!precoOriginal) {
+        pistasDesconto = coletarPistas(corpo, "original_price|previous_price|regular_price|discount");
       }
 
       produtos.unshift({
@@ -230,12 +241,21 @@ async function main() {
         link: linkOriginal,
       });
 
+      const avisos = [];
       if (!dados.preco) {
-        const pistas = coletarPistasDePreco(corpo);
-        erros.push(
-          `${linkOriginal} — produto adicionado, mas sem preço. Pistas encontradas na página:\n  ` +
-            (pistas.length > 0 ? pistas.join("\n  ") : "(nenhuma ocorrência de 'price' encontrada na página)")
+        const pistas = coletarPistas(corpo, "price");
+        avisos.push(
+          "sem preço. Pistas:\n  " +
+            (pistas.length > 0 ? pistas.join("\n  ") : "(nenhuma ocorrência de 'price' encontrada)")
         );
+      } else if (!precoOriginal && pistasDesconto.length > 0) {
+        avisos.push(
+          "preço encontrado, mas sem preço original (pode ser que não tenha desconto mesmo). Pistas de desconto encontradas:\n  " +
+            pistasDesconto.join("\n  ")
+        );
+      }
+      if (avisos.length > 0) {
+        erros.push(`${linkOriginal} — produto adicionado, ${avisos.join(" | ")}`);
       }
 
       console.log(`Adicionado (via ${dados.origem}): ${dados.nome}`);
