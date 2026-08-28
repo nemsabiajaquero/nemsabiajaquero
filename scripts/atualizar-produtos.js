@@ -105,6 +105,22 @@ function extrairDadosDoProduto(corpo) {
   return extrairDoJsonLd(corpo) || extrairDeMetaTags(corpo);
 }
 
+// Formato próprio do Mercado Livre (não é o padrão JSON-LD/Open Graph):
+// blocos tipo "price":{"current_price":{"value":47.8,...}} espalhados pelo
+// HTML. Pega a primeira ocorrência, que costuma ser a do produto principal
+// (as ocorrências seguintes tendem a ser de produtos recomendados/relacionados).
+function extrairPrecoDeComponentes(corpo) {
+  const mAtual = corpo.match(/"current_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/);
+  if (!mAtual) return null;
+
+  const mOriginal = corpo.match(/"original_price"\s*:\s*\{\s*"value"\s*:\s*([\d.]+)/);
+
+  return {
+    preco: formatarPreco(mAtual[1]),
+    precoOriginal: mOriginal ? formatarPreco(mOriginal[1]) : "",
+  };
+}
+
 // Quando não acha o preço, junta pedacinhos da página perto de qualquer
 // ocorrência de "price" pra gente conseguir ver o formato real usado —
 // em vez de ficar chutando às cegas.
@@ -196,11 +212,20 @@ async function main() {
         continue;
       }
 
+      let precoOriginal = "";
+      if (!dados.preco) {
+        const precos = extrairPrecoDeComponentes(corpo);
+        if (precos) {
+          dados.preco = precos.preco;
+          precoOriginal = precos.precoOriginal;
+        }
+      }
+
       produtos.unshift({
         nome: dados.nome,
         categoria: extrairCategoria(corpo),
         preco: dados.preco,
-        precoOriginal: "",
+        precoOriginal,
         imagem: dados.imagem,
         link: linkOriginal,
       });
