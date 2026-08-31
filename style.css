@@ -48,8 +48,8 @@ a { color: inherit; }
 }
 
 .logo {
-  width: 250px;
-  height: 250px;
+  width: 148px;
+  height: 148px;
   object-fit: contain;
   margin: 0 auto 4px;
   display: block;
@@ -71,6 +71,34 @@ a { color: inherit; }
   font-size: 0.72rem;
   color: var(--ink-soft);
   margin: 0;
+}
+
+.instagram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--maroon);
+  background: var(--white);
+  border: 2px solid var(--maroon);
+  border-radius: 999px;
+  padding: 6px 14px;
+  text-decoration: none;
+  margin: 4px 0 10px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.instagram-link:hover {
+  background: var(--maroon);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.instagram-link:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
 }
 
 /* ---------- Categorias (pills) ---------- */
@@ -285,6 +313,15 @@ a { color: inherit; }
   font-size: 0.72rem;
   font-family: var(--font-mono);
   color: rgba(255, 248, 238, 0.45);
+}
+
+.footer-link {
+  color: rgba(255, 248, 238, 0.75);
+  text-decoration: underline;
+}
+
+.footer-link:hover {
+  color: var(--mustard);
 }
 
 @media (max-width: 360px) {
